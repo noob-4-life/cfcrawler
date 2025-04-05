@@ -2,15 +2,8 @@ import random
 import typing
 from functools import lru_cache
 
-from httpx import AsyncHTTPTransport, _types
+from httpx import AsyncHTTPTransport
 from httpx._client import AsyncClient as _AsyncClient
-from httpx._config import (
-    DEFAULT_LIMITS,
-    DEFAULT_MAX_REDIRECTS,
-    DEFAULT_TIMEOUT_CONFIG,
-    Limits,
-)
-from httpx._transports.base import AsyncBaseTransport
 from typing_extensions import assert_never
 
 from cfcrawler.tls import mimic_tls_fingerprint_from_browser
@@ -50,27 +43,7 @@ class AsyncClient(_AsyncClient):
         user_agent_factory: typing.Optional[typing.Callable[[], str]] = None,
         use_fake_useragent_library: bool = False,
         transport: typing.Optional[AsyncHTTPTransport] = None,
-        auth: typing.Optional[_types.AuthTypes] = None,
-        params: typing.Optional[_types.QueryParamTypes] = None,
-        headers: typing.Optional[_types.HeaderTypes] = None,
-        cookies: typing.Optional[_types.CookieTypes] = None,
-        verify: _types.VerifyTypes = False,
-        cert: typing.Optional[_types.CertTypes] = None,
-        http1: bool = True,
-        http2: bool = False,
-        proxies: typing.Optional[_types.ProxiesTypes] = None,
-        mounts: typing.Optional[typing.Mapping[str, AsyncBaseTransport]] = None,
-        timeout: _types.TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
-        follow_redirects: bool = False,
-        limits: Limits = DEFAULT_LIMITS,
-        max_redirects: int = DEFAULT_MAX_REDIRECTS,
-        event_hooks: typing.Optional[
-            typing.Mapping[str, typing.List[typing.Callable[..., typing.Any]]]
-        ] = None,
-        base_url: _types.URLTypes = "",
-        app: typing.Optional[typing.Callable[..., typing.Any]] = None,
-        trust_env: bool = True,
-        default_encoding: typing.Union[str, typing.Callable[[bytes], str]] = "utf-8",
+        **kwargs: typing.Any,
     ):
         self.browser: Browser = browser or random.choice(
             [Browser.CHROME, Browser.FIREFOX]
@@ -83,26 +56,8 @@ class AsyncClient(_AsyncClient):
         self.cipher_suite = cipher_suite
 
         super().__init__(
-            auth=auth,
-            params=params,
-            headers=headers or {},
-            cookies=cookies,
-            timeout=timeout,
-            follow_redirects=follow_redirects,
-            max_redirects=max_redirects,
-            event_hooks=event_hooks,
-            base_url=base_url,
-            verify=verify,
-            cert=cert,
-            http2=http2,
             transport=self._custom_transport,
-            app=app,
-            http1=http1,
-            proxies=proxies,
-            limits=limits,
-            trust_env=trust_env,
-            default_encoding=default_encoding,
-            mounts=mounts,
+            **kwargs,
         )
         self.rotate_useragent()
 
